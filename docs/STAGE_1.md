@@ -109,7 +109,7 @@ _Шлях до БД некоректний або не існує_
 
 ### Діаграми класів (2)
 
-![Картинка 1-ї та 2-ї діаграм класів](img/Stage1_VR_class_diagram.png)
+![Картинка 1-ї та 2-ї діаграм класів](https://github.com/ValeriiRuchko/IT_DBMSLab/blob/main/img/Stage1_VR_class_diagram.png)
 
 ### Діаграми взаємодій (4)
 
