@@ -2,4 +2,4 @@
 
 Функціональна специфікація _системи управління табличними базами дани_ (СУТБД) у вигляді однієї або кількох діаграм прецедентів **UML**.
 
-![Картинка 0-го етапу](https://github.com/ValeriiRuchko/IT_DBMSLab/blob/main/img/Stage0_Valerii_Ruchko.drawio.png)
+![Картинка 0-го етапу](/img/Stage0_Valerii_Ruchko.drawio.png)
