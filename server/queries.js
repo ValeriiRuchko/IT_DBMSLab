@@ -1,5 +1,5 @@
 const Pool = require('pg').Pool;
-const Client = require('pg').Client;
+// const Client = require('pg').Client;
 
 const createPool = (database_name) => {
     // creating new pool to connect to our db
