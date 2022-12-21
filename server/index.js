@@ -44,52 +44,50 @@ app.route("/databases")
         // getting db_name to be created from form-data sent in json format
         const user_db_name = request.body.db_name;
         // variable to check if db is already created or not
-        let db_exists = true;
+        let db_exists;
         // acquiring client from a pool of main database which stores info about all user's databases
-        pools.get("it_dbms_lab").connect((err, client, release) => {
-            if (err) {
-                return console.error('Error acquiring client', err.stack)
-            }; 
-            // checking database existence by comparing names of all db's which are on current db-server to user's db name
-            client.query('SELECT datname FROM pg_database WHERE datname = ($1)', [user_db_name] ,(error, results) => {
-                if (error) {
-                    console.log(error.stack);
-                }
-                if (results.rows[0] === undefined) {
+        const checkExistence = async () => {
+            const client = await pools.get("it_dbms_lab").connect();
+            try {
+                // checking database existence by comparing names of all db's which are on current db-server to user's db name
+                const res = await client.query('SELECT datname FROM pg_database WHERE datname = ($1)', [user_db_name]);
+                // console.log(res.rows[0] === undefined);
+                if (res.rows[0] === undefined) {
                     db_exists = false;
                     response.status(200).json({db_name: user_db_name});
                 } else {
-                    response.status(200).send("DB exists");
+                    db_exists = true;
+                    response.status(200).json({info: "DB already exists"});
                 }
-                //console.log(results.rows[0]);
-                console.log(results.rows[0] === undefined);
-                release();  // releasing our client after going through query back to pool
-           })  
-        })
+            } catch (err) {
+                console.error('Error quering with', err.stack)
+            } finally {
+                client.release();   // releasing our client after going through query back to pool
+            }
+        };
         // creating new database if it doesn't exist
-        if(!db_exists === false) {
-            pools.get("it_dbms_lab").connect((err, client, release) => {
-                if (err) {
-                    return console.error('Error acquiring client', err.stack)
-                }; 
-                client.query(`CREATE DATABASE ${user_db_name}`, (error, results) => {
-                    if (error) {
-                        console.log(error.stack);
-                    } else {
-                        console.log(`Database ${user_db_name} was created successfully`);
-                    }
-                })
+        const createDB = async () => {
+            const client = await pools.get("it_dbms_lab").connect();
+            try {
+                const res = await client.query(`CREATE DATABASE ${user_db_name}`);
                 // inserting db_name to our main db which holds info about other databases
-                client.query('INSERT INTO virtual_databases (db_name) VALUES ($1) RETURNING *', [user_db_name], (error, results) => {
-                    if (error) {
-                        console.log(error.stack);
-                    }
-                })
-                release();
-            })
-        }
-        pools.set(user_db_name, db.createPool("user_db_name")); // adding new db pool to our pools array
-        console.log(pools);
+                const res2 = await client.query('INSERT INTO virtual_databases (db_name) VALUES ($1) RETURNING *', [user_db_name]);
+                console.log(`Database ${user_db_name} was created successfully`);
+            } catch (err) {
+                console.error('Error creating DB', err.stack)
+            } finally {
+                client.release();
+            }
+        };
+
+        checkExistence().then( () => {
+            // console.log(`dbexists = ${db_exists}`);
+            if(db_exists == false) {
+                createDB();
+            }
+        });
+        pools.set(user_db_name, db.createPool(user_db_name)); // adding new db pool to our pools array
+        // console.log(pools);
     });
 
 // app.route("/databases/:id")
