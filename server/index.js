@@ -176,6 +176,9 @@ app.route("/databases/:db_name")
 app.route("/databases/:db_name/:table_name")
     .get();
 
+// app.route("/databases/:db_name/:table_name/create_column")
+// .post();
+
 // post (create row) delete patch(change row)
 
 app.listen(port, () => {
